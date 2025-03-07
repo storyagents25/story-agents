@@ -1,0 +1,15 @@
+name: story-agents
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.8
+  - pip
+  - pip:
+      - langchain-community
+      - langchain_openai
+      - numpy
+      - pandas
+      - matplotlib
+      - seaborn
+      - jupyterlab
