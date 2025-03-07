@@ -7,7 +7,7 @@ import random
 import statistics
 import csv
 import re
-from llama_sds import Agent, DummyAgent, calculate_payoffs
+from llama_model import Agent, DummyAgent, calculate_payoffs
 
 def prepare_experiment(exp_name, csv_header):
     """Prepares output files for logging results."""
