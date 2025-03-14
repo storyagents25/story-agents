@@ -87,14 +87,14 @@ You can run different experiments using the `main.py` script.
 Runs **100 games per story** for agent sizes **[4, 16, 32]**.
 
 #### **(a) Cooperation Among Homogeneous Agents**
-To parallelly run the experiment for each story:
+To run across the experiment for all stories:
 ```bash
 for i in {0..11}; do python main.py --exp_type same_story --story_index $i; done
 ```
 #### **(b) Robustness Experiment**
 Same as the same story experiment, but introduces one dummy agent who always contributes 0. <br>
 
-To parallelly run the experiment for each story:
+To run across the experiment for all stories:
 ```bash
 for i in {0..11}; do python main.py --exp_type bad_apple --story_index $i; done
 ```
