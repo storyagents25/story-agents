@@ -3,28 +3,27 @@
 # -----------------------------
 import os
 import time
-import requests  # Needed for SDS llama requests
+import requests  # Needed for llama requests
 from langchain_openai import ChatOpenAI
 from langchain.schema import SystemMessage, HumanMessage
 
-# Set your backend here: choose "sds" or "openai"
-LLM_CHOICE = "sds"
+# Set your backend here: choose "llama" or "openai"
+LLM_CHOICE = "llama"
 
 # For OpenAI backend (if used)
 # SET YOUR OPENAI API KEY HERE
 OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
 LLAMA_API_URL = os.getenv("LLAMA_API_URL")
 # -----------------------------
-# SDSllama Helper Class
+# Llama Helper Class
 # -----------------------------
 # This class implements an LLM interface similar to ChatOpenAI,
-# but calls the SDS llama endpoint via a POST request.
-class SDSllama:
+# but calls the llama endpoint via a POST request.
+class Llama:
     def __init__(self, model_name, temperature, max_tokens, openai_api_key=None):
         self.model_name = model_name
         self.temperature = temperature
         self.max_tokens = max_tokens
-        # openai_api_key is not used with SDS
 
     def invoke(self, history):
         # Build messages in a robust way.
@@ -96,10 +95,10 @@ class Agent:
 
 
         # Create the appropriate LLM instance
-        if LLM_CHOICE == "sds":
-            self.llm = SDSllama(
-            model_name="meta-llama-3.3-70b-instruct-fp8",  # adjust as needed
-            temperature=0.8,
+        if LLM_CHOICE == "llama":
+            self.llm = Llama(
+            model_name="meta-llama-3.1-70b-instruct-fp8",  # adjust as needed
+            temperature=0.6,
             max_tokens=500,
         )
         else: 
@@ -147,7 +146,7 @@ class DummyAgent:
         """
         log_records(f"{self.name} (dummy) receives HUMAN message: {message}", self.records_file)
         # We return "0" as a string to emulate the minimal integer-based response.
-        response_content = "0"
+        response_content = "<TOKEN>0</TOKEN>"
         log_records(f"{self.name} (dummy) responds ASSISTANT: {response_content}", self.records_file)
         time.sleep(0.01)  # a brief pause, mirroring the normal agent
         return response_content

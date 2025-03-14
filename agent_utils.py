@@ -7,7 +7,7 @@ import random
 import statistics
 import csv
 import re
-from llama_model import Agent, DummyAgent, calculate_payoffs
+from llm_model import Agent, DummyAgent, calculate_payoffs
 
 def prepare_experiment(exp_name, csv_header):
     """Prepares output files for logging results."""
@@ -106,7 +106,7 @@ def get_valid_contribution(agent, round_num, e, max_retries=5):
     print(f"Error: {agent.name} failed to provide a valid response after {max_retries} attempts. Defaulting to 0.")
     return 0
 
-def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_index, prompt_label, exp_type):
+def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_index, prompt_label, exp_type, num_dummy_agents):
     """
     Executes a full game session consisting of multiple rounds where agents contribute to a shared pool.
     Args:
@@ -120,6 +120,7 @@ def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_ind
         game_index (int): Game identifier.
         prompt_label (str): Label for the prompt or story used.
         exp_type (str): "same_story" or "different_story" (to determine CSV formatting).
+        num_dummy_agents: Number of dummy agents in the game
     Returns:
         effective_score (float): The overall collaboration score.
         total_rewards (list): Cumulative rewards for each agent.
@@ -178,7 +179,7 @@ def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_ind
             ])
 
     # Compute the effective collaboration score.
-    max_possible = na * e * nr
+    max_possible = (na - num_dummy_agents) * e * nr
     effective_score = total_game_contributions / max_possible
     print(f"\nEffective Collaboration Score for this game: {effective_score:.2f}")
 
@@ -219,7 +220,7 @@ def run_single_game(game_index: int, prompt_label: str, system_prompt_used: str,
     
     # Executes all rounds of the game, tracking contributions, payoffs, and collaboration scores.
     effective_score, _ = execute_game_rounds(
-        agents, na, nr, e, m, csv_writer, records_file, game_index, prompt_label, exp_type
+        agents, na, nr, e, m, csv_writer, records_file, game_index, prompt_label, exp_type, num_dummy_agents
     )
     return effective_score
 
@@ -244,7 +245,7 @@ def run_single_game_random_story(game_index: int, system_prompt_story: str, na: 
 
     # Executes all rounds of the game, tracking contributions, payoffs, and collaboration scores.
     effective_score, total_rewards = execute_game_rounds(
-        agents, na, nr, e, m, csv_writer, records_file, game_index, "All", exp_type
+        agents, na, nr, e, m, csv_writer, records_file, game_index, "All", exp_type, 0
     )
 
     # Prepare results: (agent_name, story_label, cumulative_reward)
