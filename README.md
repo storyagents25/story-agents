@@ -6,18 +6,22 @@
 This project consists of **two main experiments**:
 1. **Homogenous Experiment**: 
 
-- **Cooperation Among Homogeneous Agents:**
+    - **Cooperation Among Homogeneous Agents:**
 4 Number of agents receive the same story from a set of 12 stories and play 100 games.
 
-- **Scaling Experiment:**
+    - **Scaling Experiment:**
 We investigate scaling behavior by increasing the number of agents, N ,
 from 4 to 16 and 32. 
 
-- **Robustness Experiment**: 
+    - **Robustness Experiment**: 
 To assess cooperative resilience under adversarial conditions, we designed a robustness experiment with 4 agent groups in which one agent consistently contributed **zero tokens (dummy agent)**, simulating persistent free-riding behavior.
 
 2. **Heterogenous Experiment**: Each agent is assigned a random story, and 200 games are run with 4 agents per game.
 
+### **Illustration**
+
+placeholder illustration, to be updated by EOD 14.03
+<p align="center"> <img src="sample_figures/public-goods-game-experiment.jpg" width="600"> </p>
 
 The study tracks the following metrics:
 - **Contributions** per round
@@ -79,24 +83,27 @@ You can run different experiments using the `main.py` script.
 
 ---
 
-### **1. Same Story Experiment**
+### **1. Homogenous Experiment**
 Runs **100 games per story** for agent sizes **[4, 16, 32]**.
+
+#### **(a) Cooperation Among Homogeneous Agents**
 To parallelly run the experiment for each story:
 ```bash
 for i in {0..11}; do python main.py --exp_type same_story --story_index $i; done
 ```
-
-### **2. Different Story Experiment**
-Assigns a random story to each agent and runs 200 games with 4 agents.
-```bash
-python main.py --exp_type different_story
-```
-### **3. Robustness Experiment (Bad Apple)**
+#### **(b) Robustness Experiment**
 Same as the same story experiment, but introduces one dummy agent who always contributes 0. <br>
+
 To parallelly run the experiment for each story:
 ```bash
 for i in {0..11}; do python main.py --exp_type bad_apple --story_index $i; done
 ```
+### **2. Heterogenous Experiment**
+Assigns a random story to each agent and runs 200 games with 4 agents.
+```bash
+python main.py --exp_type different_story
+```
+
 ## **Visualization**
 The project includes scripts to visualize collaboration and scaling results.
 ### **1. Distribution Analysis Plots**
