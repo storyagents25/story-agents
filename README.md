@@ -20,8 +20,8 @@ To assess cooperative resilience under adversarial conditions, we designed a rob
 
 ### **Illustration**
 
-placeholder illustration, to be updated by EOD 14.03
-<p align="center"> <img src="sample_figures/public-goods-game-experiment.jpg" width="600"> </p>
+Repeated multi-round public goods game among homogeneous and heterogeneous LLM agents primed with various narratives.
+<p align="center"> <img src="sample_figures/storyagents_Illustration.jpg" width="600"> </p>
 
 The study tracks the following metrics:
 - **Contributions** per round
