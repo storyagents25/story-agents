@@ -70,7 +70,7 @@ def plot_violin(df, metric, title, output_pdf, plot_mean_line=True, show_legend=
     # Compute x-axis order based on mean metric values
     order = (df.groupby("PromptType")[metric]
             .mean()
-            .sort_values(ascending=False)
+            .sort_values(ascending=True)
             .index.tolist())
 
     plt.figure(figsize=(12, 7))
