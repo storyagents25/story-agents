@@ -97,7 +97,7 @@ class Agent:
         # Create the appropriate LLM instance
         if LLM_CHOICE == "llama":
             self.llm = Llama(
-            model_name="meta-llama-3.1-70b-instruct-fp8",  # adjust as needed
+            model_name="meta-llama-3.3-70b-instruct-fp8",  # adjust as needed
             temperature=0.6,
             max_tokens=500,
         )

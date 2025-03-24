@@ -28,7 +28,7 @@ if exp_type in ["same_story", "bad_apple"]:
     else:
         num_agents_list = [16]
 elif exp_type == 'different_story':
-    num_games = 200
+    num_games = 400
     num_agents_list = [16]
 
 # -----------------------------

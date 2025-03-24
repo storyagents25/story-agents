@@ -1,4 +1,5 @@
 # **Story Agents - A Multi-Agent Public Goods Experiment**
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/storyagents25/story-agents/)
 
 ## **Overview**
 **Story Agents** is a multi-agent framework for studying how different storytelling influences cooperation in a repeated **Public Goods Game**. The framework allows experiments where **agents contribute tokens**, earn payoffs, and analyze the effects of different story assignments.
@@ -31,6 +32,13 @@ The study tracks the following metrics:
 
 ---
 
+## Releases
+
+**v1.0-initial-experiments**  
+Marks the commit corresponding to the initial experiments as described in the paper submitted for review.  
+[🔗 View Tag on GitHub](https://github.com/storyagents25/story-agents/tree/v1.0-initial-experiments)
+
+---
 ## **Features**
 - Multi-agent framework with LLM-powered decision-making  
 - Customizable storytelling influence on cooperation  
@@ -59,8 +67,10 @@ conda env create -f environment.yml
 ```bash
 conda activate story-agents
 ```
+### **Option 2: Using Google Colab**
+You can upload the  `story_agents_experiments.ipynb` file to [Google Colab](https://colab.research.google.com/?utm_source=scs-index) or click on the _open in colab_ badge at the top.
 
-### **Option 2: Using Pip**
+### **Option 3: Using Pip**
 ```bash
 pip install -U langchain-community
 ```
