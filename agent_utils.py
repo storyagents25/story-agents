@@ -1,6 +1,3 @@
-# -----------------------------
-# Global Settings and Imports
-# -----------------------------
 import os
 import pickle
 import random
@@ -8,15 +5,6 @@ import statistics
 import csv
 import re
 from llm_model import Agent, DummyAgent, calculate_payoffs
-
-def prepare_experiment(exp_name, csv_header):
-    """Prepares output files for logging results."""
-
-    records_file = open(f"records_{exp_name}.txt", "w", encoding="utf-8")
-    game_results_file = open(f"game_results_{exp_name}.csv", "w", newline="", encoding="utf-8")
-    csv_writer = csv.writer(game_results_file)
-    csv_writer.writerow(csv_header)
-    return records_file, game_results_file, csv_writer
 
 def load_intermediate_results(exp_name, is_dict=True):
     """Loads intermediate results from a pickle file if it exists."""
@@ -106,6 +94,59 @@ def get_valid_contribution(agent, round_num, e, max_retries=5):
     print(f"Error: {agent.name} failed to provide a valid response after {max_retries} attempts. Defaulting to 0.")
     return 0
 
+def collect_contributions(agents, round_num, e):
+    """Collects valid contributions from all agents."""
+    contributions = []
+    for agent in agents:       
+        contribution = get_valid_contribution(agent, round_num, e)
+        
+        # Enforce valid contribution range
+        available_tokens = e # Each agent gets `e` tokens every round
+        if contribution > available_tokens:
+            print(f"{agent.name} attempted to contribute {contribution} tokens but only has {available_tokens}. "
+                    f"Reducing contribution to {available_tokens}.")
+            contribution = available_tokens
+        contribution = max(0, contribution)
+        contributions.append(contribution)
+    print(f"Round Contributions: {contributions}")
+    return contributions
+
+def calculate_rewards(contributions, agents, e, m, na, total_rewards, round_num):
+    """Calculates payoffs and updates agent rewards."""
+    round_total = sum(contributions)    
+    # Calculate payoffs for the round.
+    payoffs = calculate_payoffs(contributions, e, m, na)
+    print(f"Round Payoffs: {payoffs}")
+
+    for idx, agent in enumerate(agents):
+        total_rewards[idx] += payoffs[idx]
+        summary = (
+            f"Round {round_num} Summary:\n"
+            f" - Your contribution: {contributions[idx]}\n"
+            f" - Total contributions: {round_total}\n"
+            f" - Your payoff this round: {payoffs[idx]:.2f}\n"
+            f" - Your cumulative reward: {total_rewards[idx]:.2f}"
+        )
+        agent.chat(summary)
+
+    return payoffs, round_total, total_rewards
+
+
+def log_round_results(csv_writer, agents, contributions, payoffs, total_rewards, game_index, prompt_label, round_num, exp_type):
+    """Logs round results to CSV."""
+    for idx, agent in enumerate(agents):
+        story_or_prompt_label = agent.story_label if exp_type == "different_story" else prompt_label
+        # Write per-round info to the CSV file.
+        csv_writer.writerow([
+            game_index,
+            story_or_prompt_label,
+            round_num,
+            agent.name,
+            contributions[idx],
+            f"{payoffs[idx]:.2f}",
+            f"{total_rewards[idx]:.2f}",
+            "" # CollaborationScore left empty for per-round details.
+        ])
 def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_index, prompt_label, exp_type, num_dummy_agents):
     """
     Executes a full game session consisting of multiple rounds where agents contribute to a shared pool.
@@ -125,63 +166,20 @@ def execute_game_rounds(agents, na, nr, e, m, csv_writer, records_file, game_ind
         effective_score (float): The overall collaboration score.
         total_rewards (list): Cumulative rewards for each agent.
     """
-    total_game_contributions = 0
     total_rewards = [0 for _ in range(na)]
+    total_game_contributions = 0
 
     print("\n=== Starting a New Game ===")
     for round_num in range(1, nr + 1):
         print(f"\n--- Round {round_num} ---")
-        contributions = []
-
-        # Each agent selects a contribution
-        for i, agent in enumerate(agents):
-            contribution = get_valid_contribution(agent, round_num, e)
-            
-            # Enforce valid contribution range
-            available_tokens = e  # Each agent gets `e` tokens every round
-            if contribution > available_tokens:
-                print(f"{agent.name} attempted to contribute {contribution} tokens but only has {available_tokens}. "
-                    f"Reducing contribution to {available_tokens}.")
-                contribution = available_tokens
-            contribution = max(0, contribution)
-            contributions.append(contribution)
-
-        print(f"Round Contributions: {contributions}")
-        round_total = sum(contributions)
+        contributions = collect_contributions(agents, round_num, e)
+        payoffs, round_total, total_rewards = calculate_rewards(contributions, agents, e, m, na, total_rewards, round_num)
+        log_round_results(csv_writer, agents, contributions, payoffs, total_rewards, game_index, prompt_label, round_num, exp_type)
         total_game_contributions += round_total
 
-        # Calculate payoffs for the round.
-        payoffs = calculate_payoffs(contributions, e, m, na)
-        print(f"Round Payoffs: {payoffs}")
-
-        # Update each agent's cumulative reward and send them a round summary.
-        for idx, agent in enumerate(agents):
-            total_rewards[idx] += payoffs[idx]
-            summary = (
-                f"Round {round_num} Summary:\n"
-                f" - Your contribution: {contributions[idx]}\n"
-                f" - Total contributions: {round_total}\n"
-                f" - Your payoff this round: {payoffs[idx]:.2f}\n"
-                f" - Your cumulative reward: {total_rewards[idx]:.2f}"
-            )
-            agent.chat(summary)
-            story_or_prompt_label = agent.story_label if exp_type == "different_story" else prompt_label
-            # Write per-round info to the CSV file.
-            csv_writer.writerow([
-                game_index,
-                story_or_prompt_label,
-                round_num,
-                agent.name,
-                contributions[idx],
-                f"{payoffs[idx]:.2f}",
-                f"{total_rewards[idx]:.2f}",
-                ""  # CollaborationScore left empty for per-round details.
-            ])
-
-    # Compute the effective collaboration score.
     max_possible = (na - num_dummy_agents) * e * nr
     effective_score = total_game_contributions / max_possible
-    print(f"\nEffective Collaboration Score for this game: {effective_score:.2f}")
+    print(f"\nEffective Collaboration Score: {effective_score:.2f}")
 
     # Write the final row with the collaboration score.
     csv_writer.writerow([

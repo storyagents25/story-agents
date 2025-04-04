@@ -11,16 +11,17 @@ COLOR_DICT = {
     "maxreward": "#87CEFA",
     "noinstruct": "#4682B4", 
     "nsCarrot": "#4169E1",  
-    "nsPlumber": "#00008B",  
+    "nsPlumber": "#27408B",  
     # Meaningful stories (Shades of Purple/Pink)
+    "selfcare": "#F5C5ED",
     "Odyssey": "#FFB3E6",
     "Soup": "#FF99CC",
     "Peacemaker": "#FF66B3", 
     "Musketeers": "#FF4D9E",  
     "Teamwork": "#F02278",  
-    "Spoons": "#D81B60", 
-    "Turnip": "#B83B7D", 
     "OldManSons": "#B22272", 
+    "Turnip": "#B83B7D", 
+    
 }
 
 # Ensure vectorized rendering

@@ -1,7 +1,3 @@
-# -----------------------------
-# Global Settings and Imports
-# -----------------------------
-
 import argparse
 from experiment_runner import run_same_story_experiment, run_different_story_experiment
 
@@ -35,18 +31,23 @@ elif exp_type == 'different_story':
 # Main Execution
 # -----------------------------
 if __name__ == "__main__":
-    if exp_type in ["same_story", "bad_apple"]:
-        run_same_story_experiment(
-            is_bad_apple=(exp_type == "bad_apple"),
-            story_index=args.story_index,
-            num_rounds_list=num_rounds_list,
-            endowment_list=endowment_list,
-            multiplier_list=multiplier_list,
-            num_games=num_games,
-            num_agents_list=num_agents_list,
-            exp_type = exp_type
-        )
-    elif exp_type == "different_story":
-        run_different_story_experiment(
-            num_rounds_list, endowment_list, multiplier_list, num_games, num_agents_list, exp_type
-        )
+    try:       
+        if exp_type in ["same_story", "bad_apple"]:
+            run_same_story_experiment(
+                is_bad_apple=(exp_type == "bad_apple"),
+                story_index=args.story_index,
+                num_rounds_list=num_rounds_list,
+                endowment_list=endowment_list,
+                multiplier_list=multiplier_list,
+                num_games=num_games,
+                num_agents_list=num_agents_list,
+                exp_type = exp_type
+            )
+        elif exp_type == "different_story":
+            run_different_story_experiment(
+                num_rounds_list, endowment_list, multiplier_list, num_games, num_agents_list, exp_type
+            )
+        else:
+            print(f"[ERROR] Unknown experiment type: {exp_type}")
+    except Exception as e:
+        print(f"[ERROR] Experiment '{exp_type}' failed: {e}")

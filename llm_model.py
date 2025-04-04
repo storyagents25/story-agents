@@ -1,33 +1,42 @@
-# -----------------------------
-# Global Settings and Imports
-# -----------------------------
 import os
 import time
-import requests  # Needed for llama requests
+import requests
+from typing import List, Dict, Any, TextIO
 from langchain_openai import ChatOpenAI
-from langchain.schema import SystemMessage, HumanMessage
+from langchain.schema import SystemMessage, HumanMessage, AIMessage, BaseMessage
 
-# Set your backend here: choose "llama" or "openai"
-LLM_CHOICE = "llama"
+# -----------------------------
+# Central Configuration
+# -----------------------------
+config: Dict[str, Any] = {
+    "llm_choice": os.getenv("LLM_CHOICE", "llama"),
+    "llama": {
+        "model_name": os.getenv("LLAMA_MODEL_NAME", "meta-llama-3.3-70b-instruct-fp8"),
+        "temperature": float(os.getenv("LLAMA_TEMP", 0.6)),
+        "max_tokens": int(os.getenv("LLAMA_MAX_TOKENS", 500)),
+        "api_url": os.getenv("LLAMA_API_URL")
+    },
+    "openai": {
+        "model_name": os.getenv("OPENAI_MODEL_NAME", "gpt-4o-mini"),
+        "temperature": float(os.getenv("OPENAI_TEMP", 1.0)),
+        "max_tokens": int(os.getenv("OPENAI_MAX_TOKENS", 10)),
+        "api_key": os.getenv("OPENAI_API_KEY")
+    },
+}
 
-# For OpenAI backend (if used)
-# SET YOUR OPENAI API KEY HERE
-OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
-LLAMA_API_URL = os.getenv("LLAMA_API_URL")
 # -----------------------------
 # Llama Helper Class
 # -----------------------------
-# This class implements an LLM interface similar to ChatOpenAI,
-# but calls the llama endpoint via a POST request.
 class Llama:
-    def __init__(self, model_name, temperature, max_tokens, openai_api_key=None):
+    def __init__(self, model_name: str, temperature: float, max_tokens: int, api_url: str) -> None:
         self.model_name = model_name
         self.temperature = temperature
         self.max_tokens = max_tokens
+        self.api_url = api_url
 
-    def invoke(self, history):
+    def invoke(self, history: List[BaseMessage]) -> AIMessage:
         # Build messages in a robust way.
-        messages = []
+        messages: List[Dict[str, str]] = []
         for msg in history:
             # Try to extract role and content, whether msg is an object or dict.
             if hasattr(msg, "role") and hasattr(msg, "content"):
@@ -41,73 +50,82 @@ class Llama:
                 content = str(msg)
             messages.append({"role": role, "content": content})
 
-        data = {
+        data: Dict[str, Any] = {
             "model": self.model_name,
             "messages": messages,
             "max_tokens": self.max_tokens,
             "temperature": self.temperature
         }
-        response = requests.post(LLAMA_API_URL, json=data)
-        # Optionally add error checking for response status here
-        response_data = response.json()
-        content = response_data["choices"][0]["message"]["content"]
-        from langchain.schema import AIMessage
+
+        try:
+            response = requests.post(self.api_url, json=data, timeout=30)
+            response.raise_for_status()
+        except requests.exceptions.Timeout:
+            raise RuntimeError("Llama API request timed out.")
+        except requests.exceptions.HTTPError as http_err:
+            raise RuntimeError(f"Llama API HTTP error: {http_err}")
+        except requests.exceptions.RequestException as err:
+            raise RuntimeError(f"Llama API connection error: {err}")
+
+        try:
+            response_data = response.json()
+            content = response_data["choices"][0]["message"]["content"]
+        except (ValueError, KeyError, IndexError) as parse_err:
+            raise RuntimeError(f"Failed to parse Llama API response: {parse_err}")
+
         return AIMessage(content=content)
 
-# -----------------------------
-# SET YOUR OPENAI API KEY HERE
-# -----------------------------
-# OPENAI_API_KEY = "YOUR_OPENAI_API_KEY"
-
-
-def log_records(message: str, records_file):
+def log_records(message: str, records_file: TextIO) -> None:
     """
     Helper function to log a message to records file so we can keep track of all history.
     """
     records_file.write(message + "\n")
-    records_file.flush()  # make sure it's written immediately
+    records_file.flush() # make sure it's written immediately
 
-
-def calculate_payoffs(contributions, e, m, na):
+def calculate_payoffs(contributions: List[float], e: float, m: float, na: int) -> List[float]:
     """
     Given a list of contributions from each agent, compute the payoff for each agent.
     """
-    total = sum(contributions)
-    shared_bonus = m * total / na
+    total: float = sum(contributions)
+    shared_bonus: float = m * total / na
     return [e - c + shared_bonus for c in contributions]
 
-
+# -----------------------------
+# Agent Class
+# -----------------------------
 class Agent:
     """
     A simple agent that uses an LLM backend determined by LLM_CHOICE.
     It maintains its own conversation history so that previous rounds and summaries
     can influence its responses.
     """
-    def __init__(self, name, system_message, records_file):
+    def __init__(self, name: str, system_message: str, records_file: TextIO) -> None:
         self.name = name
         # Start the conversation with a system message.
-        self.history = [SystemMessage(content=system_message)]
+        self.history: List[BaseMessage] = [SystemMessage(content=system_message)]
+        self.records_file = records_file
 
         # Log the creation of this agent and its system prompt to records.
         log_records(f"CREATING AGENT: {self.name}", records_file)
         log_records(f"System Prompt for {self.name}: {system_message}", records_file)
-        self.records_file = records_file
-
 
         # Create the appropriate LLM instance
-        if LLM_CHOICE == "llama":
+        llm_choice = config["llm_choice"]
+        if llm_choice == "llama":
+            llama_cfg = config["llama"]
             self.llm = Llama(
-            model_name="meta-llama-3.3-70b-instruct-fp8",  # adjust as needed
-            temperature=0.6,
-            max_tokens=500,
-        )
-        else: 
-            # Create one instance of ChatOpenAI per agent.
+                model_name=llama_cfg["model_name"],
+                temperature=llama_cfg["temperature"],
+                max_tokens=llama_cfg["max_tokens"],
+                api_url=llama_cfg["api_url"]
+            )
+        else:
+            openai_cfg = config["openai"]
             self.llm = ChatOpenAI(
-                model_name="gpt-4o-mini",  # adjust as needed
-                temperature=1.0,
-                max_tokens=10,
-                openai_api_key=OPENAI_API_KEY
+                model_name=openai_cfg["model_name"],
+                temperature=openai_cfg["temperature"],
+                max_tokens=openai_cfg["max_tokens"],
+                openai_api_key=openai_cfg["api_key"]
             )
 
     def chat(self, message: str) -> str:
@@ -117,27 +135,33 @@ class Agent:
         """
         log_records(f"{self.name} receives HUMAN message: {message}", self.records_file)
         self.history.append(HumanMessage(content=message))
-        # Use the pre-created ChatOpenAI instance.
-        response = self.llm.invoke(self.history)
+        try:
+            response = self.llm.invoke(self.history) # Use the pre-created ChatOpenAI instance.
+        except RuntimeError as err:
+            log_records(f"{self.name} ERROR: {err}", self.records_file) 
+            return f"[ERROR]: {err}"
+
         # Store the response in the conversation history
         self.history.append(response)
-        log_records(f"{self.name} responds ASSISTANT: {response.content}", self.records_file)
         # Brief pause to help avoid rate limits
+        log_records(f"{self.name} responds ASSISTANT: {response.content}", self.records_file)       
         time.sleep(0.01)
         return response.content
-    
+
+# -----------------------------
+# DummyAgent Class
+# -----------------------------
 class DummyAgent:
     """
     A 'dummy' agent that does NOT connect to an LLM and always contributes 0.
     """
-    def __init__(self, name, system_message, records_file):
+    def __init__(self, name: str, system_message: str, records_file: TextIO) -> None:
         self.name = name
-        self.history = [SystemMessage(content=system_message)]
+        self.history: List[BaseMessage] = [SystemMessage(content=system_message)]
         self.records_file = records_file
 
         log_records(f"CREATING DUMMY AGENT: {self.name}", records_file)
         log_records(f"(Dummy) System Prompt for {self.name}: {system_message}", records_file)
-        # No LLM needed.
 
     def chat(self, message: str) -> str:
         """
