@@ -7,6 +7,10 @@
 Marks the commit corresponding to the initial experiments as described in the paper submitted for review.  
 [🔗 View Tag on GitHub](https://github.com/storyagents25/story-agents/tree/v1.0-initial-experiments)
 
+**v1.1-arxiv-upload**  
+Marks the commit corresponding to the rerun Heterogeneous experiment (temp = 0.6, 400 games).  
+[🔗 View Tag on GitHub](https://github.com/storyagents25/story-agents/tree/v1.1-arxiv-upload)
+
 ## **Overview**
 **Story Agents** is a multi-agent framework for studying how different storytelling influences cooperation in a repeated **Public Goods Game**. The framework allows experiments where **agents contribute tokens**, earn payoffs, and analyze the effects of different story assignments.
 
