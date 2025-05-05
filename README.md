@@ -141,7 +141,7 @@ Example Output:
 ### **3. Bootstrapped Pairwise Differences Visualization**
 Generates bootstrap-resampled distributions of pairwise differences in collaboration scores (and payoffs) between experiment conditions.
 
-You can upload the  `stat_vis.ipynb` file to [Google Colab](https://colab.research.google.com/?utm_source=scs-index) or click on the _open in colab_ badge at the top.
+You can upload the  `pairwise_CI_analysis.ipynb` file to [Google Colab](https://colab.research.google.com/?utm_source=scs-index) or click on the _open in colab_ badge at the top.
 
 Example Output: 
 
