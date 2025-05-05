@@ -7,15 +7,15 @@ import matplotlib.lines as mlines
 agent_sizes = [4, 16, 32]
 
 # Define color gradients for baseline (blue) and meaningful stories (pink)
-BLUE_SHADES = ["#87CEFA", "#4682B4", "#4169E1", "#00008B"]  # Light to Dark Blue
-PINK_SHADES = ["#F5C5ED", "#FFB3E6", "#FF99CC", "#FF66B3", "#FF4D9E", "#F02278", "#B22272", "#B83B7D"]  # Light to Dark Pink
+BLUE_SHADES = ["#87CEFA", "#4682B4", "#4169E1", "#27408B"]  # Light to Dark Blue
+PINK_SHADES = ["#FFB3E6", "#FF99CC", "#FF66B3", "#FF4D9E", "#F02278", "#D81B60", "#B83B7D", "#B22272"]  # Light to Dark Pink
 
 # Define file categories for different temperatures
 CATEGORY_GROUPS = {
     "temp_0.6": {
-        4: "game_results_same_story_*_ag4_ro5_end10_mult1.5_temp_0.6.csv",
-        16: "game_results_same_story_*_ag16_ro5_end10_mult1.5_temp_0.6.csv",
-        32: "game_results_same_story_*_ag32_ro5_end10_mult1.5_temp_0.6.csv",
+        4: "game_results_same_story_*_ag4_ro5_end10_mult1.5.csv",
+        16: "game_results_same_story_*_ag16_ro5_end10_mult1.5.csv",
+        32: "game_results_same_story_*_ag32_ro5_end10_mult1.5.csv",
     },
 }
 

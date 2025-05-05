@@ -13,3 +13,5 @@ dependencies:
       - matplotlib
       - seaborn
       - jupyterlab
+      - nbformat 
+      - ipykernel

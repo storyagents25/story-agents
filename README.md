@@ -14,7 +14,7 @@ This project consists of **two main experiments**:
 1. **Homogenous Experiment**: 
 
     - **Cooperation Among Homogeneous Agents:**
-4 Number of agents receive the same story from a set of 12 stories and play 100 games.
+4 agents are prompted with the same story from a set of 12 stories and play 100 games.
 
     - **Scaling Experiment:**
 We investigate scaling behavior by increasing the number of agents, N ,
@@ -23,7 +23,7 @@ from 4 to 16 and 32.
     - **Robustness Experiment**: 
 To assess cooperative resilience under adversarial conditions, we designed a robustness experiment with 4 agent groups in which one agent consistently contributed **zero tokens (dummy agent)**, simulating persistent free-riding behavior.
 
-2. **Heterogenous Experiment**: Each agent is assigned a random story, and 200 games are run with 4 agents per game.
+2. **Heterogenous Experiment**: 4 playing agents are each prompted by a random story from a set of 12 stories and play 400 games.
 
 ### **Illustration**
 
@@ -76,7 +76,7 @@ pip install -U langchain-community
 pip install --upgrade langchain_openai -q
 ```
 ```bash
-pip install numpy pandas matplotlib seaborn jupyterlab
+pip install numpy pandas matplotlib seaborn jupyterlab nbformat ipykernel
 ```
 
 ## **Setup API Keys**
@@ -137,3 +137,20 @@ python visualise_scaling_experiment.py
 Example Output:
 
 <p align="center"> <img src="sample_figures/homogenous_scaling.jpg" width="600"> </p>
+
+### **3. Bootstrapped Pairwise Differences Visualization**
+Generates bootstrap-resampled distributions of pairwise differences in collaboration scores (and payoffs) between experiment conditions.
+
+You can upload the  `stat_vis.ipynb` file to [Google Colab](https://colab.research.google.com/?utm_source=scs-index) or click on the _open in colab_ badge at the top.
+
+Example Output: 
+
+<p align="center"> <img src="sample_figures/combined_pairwise_CI_plot_same_story_ag4_ro5_end10_mult1.5.png" width="600"> </p>
+
+### **4. Summary Statistics Table**
+Generates a LaTeX table of mean ± standard deviation for final Collaboration Scores (homogeneous & robustness conditions) and final Cumulative Payoffs (heterogeneous conditions) across all story prompts with adaptive decimal precision.
+
+Run:
+```bash
+python vis_appendix_table.py
+```

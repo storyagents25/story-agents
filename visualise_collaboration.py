@@ -13,12 +13,12 @@ COLOR_DICT = {
     "nsCarrot": "#4169E1",  
     "nsPlumber": "#27408B",  
     # Meaningful stories (Shades of Purple/Pink)
-    "selfcare": "#F5C5ED",
     "Odyssey": "#FFB3E6",
     "Soup": "#FF99CC",
     "Peacemaker": "#FF66B3", 
     "Musketeers": "#FF4D9E",  
     "Teamwork": "#F02278",  
+    "Spoons": "#D81B60",
     "OldManSons": "#B22272", 
     "Turnip": "#B83B7D", 
     
@@ -147,10 +147,10 @@ def plot_violin(df, metric, title, output_pdf, plot_mean_line=True, show_legend=
 if __name__ == "__main__":
     # Define experiment types and file patterns
     CATEGORIES = {
-        "same_story_4_agents": "game_results_same_story_*_ag4_ro5_end10_mult1.5.csv",
-        "same_story_16_agents": "game_results_same_story_*_ag16_ro5_end10_mult1.5.csv",
-        "same_story_32_agents": "game_results_same_story_*_ag32_ro5_end10_mult1.5.csv",
-        "different_story_16_agents": "game_results_different_story_ag16_ro5_end10_mult1.5.csv",
+        "same_story_4_agents": "game_results_same_story_*_ag4_ro5_end10_mult1.5",
+        "same_story_16_agents": "game_results_same_story_*_ag16_ro5_end10_mult1.5",
+        "same_story_32_agents": "game_results_same_story_*_ag32_ro5_end10_mult1.5",
+        "different_story_16_agents": "game_results_different_story_ag16_ro5_end10_mult1.5",
         "bad_apple_16_agents": "game_results_bad_apple_*_ag16_ro5_end10_mult1.5.csv"
     }
 

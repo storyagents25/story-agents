@@ -25,7 +25,7 @@ if exp_type in ["same_story", "bad_apple"]:
         num_agents_list = [16]
 elif exp_type == 'different_story':
     num_games = 400
-    num_agents_list = [16]
+    num_agents_list = [4]
 
 # -----------------------------
 # Main Execution
