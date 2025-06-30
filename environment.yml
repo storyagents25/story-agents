@@ -1,17 +1,49 @@
 name: story-agents
 channels:
-  - defaults
   - conda-forge
+  - defaults
 dependencies:
-  - python=3.8
+  # Python and core packages
+  - python=3.9
   - pip
+  
+  # Scientific computing
+  - numpy>=1.21.0
+  - pandas>=1.3.0
+  - scipy>=1.7.0
+  
+  # ML and LLM
+  - requests>=2.25.0
+  
+  # Visualization
+  - matplotlib>=3.4.0
+  - seaborn>=0.11.0
+  
+  # Network analysis
+  - networkx>=2.6.0
+  
+  # Image processing (for potential visualizations)
+  - pillow>=8.0.0
+  - imageio>=2.9.0
+  
+  # Jupyter (for development/testing)
+  - jupyter
+  - jupyterlab
+  - nbformat
+  - ipykernel
+  
+  # Utilities
+  - pathlib
+  - glob2
+  
+  # Development tools
+  - pytest
+  - black
+  - flake8
+  
+  # Pip-only packages
   - pip:
-      - langchain-community
-      - langchain_openai
-      - numpy
-      - pandas
-      - matplotlib
-      - seaborn
-      - jupyterlab
-      - nbformat 
-      - ipykernel
+    - langchain-community>=0.0.10
+    - langchain-openai>=0.0.5
+    - langchain>=0.1.0
+    - tiktoken  # for OpenAI tokenization if needed

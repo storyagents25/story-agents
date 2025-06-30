@@ -1,4 +1,6 @@
 # **Story Agents - A Multi-Agent Public Goods Experiment**
+A comprehensive framework for running multi-agent public goods game experiments with narrative priming, supporting single-pool and multi-pool network topologies. 
+
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/storyagents25/story-agents/)
 
 ## Releases
@@ -11,42 +13,52 @@ Marks the commit corresponding to the initial experiments as described in the pa
 Marks the commit corresponding to the rerun Heterogeneous experiment (temp = 0.6, 400 games).  
 [🔗 View Tag on GitHub](https://github.com/storyagents25/story-agents/tree/v1.1-arxiv-upload)
 
+**v1.2-unified-single-multi-pool**  
+Marks the commit corresponding to the single/multi-pool experiments.   
+[🔗 View Tag on GitHub](https://github.com/storyagents25/story-agents/tree/v1.2-unified-single-multi-pool)
+
 ## **Overview**
-**Story Agents** is a multi-agent framework for studying how different storytelling influences cooperation in a repeated **Public Goods Game**. The framework allows experiments where **agents contribute tokens**, earn payoffs, and analyze the effects of different story assignments.
+**Public goods games** are fundamental models for understanding cooperation in economics, psychology, and social science. Players face a social dilemma: contribute to a shared pool (benefiting everyone) or keep tokens for themselves (individual benefit). **Story Agents** investigates a novel question: *How do different narratives shape cooperative behavior in these strategic interactions?*
+ 
+Our framework enables **LLM-powered agents** to participate in **repeated networked public goods games** while being primed with different stories—from folk tales about teamwork to narratives emphasizing individual success. We examine how narrative priming affects agent strategic decision-making.
 
-This project consists of **two main experiments**:
+Unlike traditional single-pool public goods experiments, our framework supports both **simple** and more **complex network structures**: 
+1. **Single-Pool**: traditional public goods game setup with one shared global pool (shared by all agents), simple contribution decision per round 
+2. **Multi-Pool**: more complex network topology with global (all agents) + local pools (agent subsets), agents balance contributions across multiple groups, sequential contribution decisions across pools 
+
+Our framework systematically tests cooperation across three key dimensions:
 1. **Homogenous Experiment**: 
+    - All agents receive the same story prompt from 12 different narratives  
+    - Tests how specific stories affect group cooperation 
+    - Supports scaling across agent sizes (4 → 16 → 32 agents)
 
-    - **Cooperation Among Homogeneous Agents:**
-4 agents are prompted with the same story from a set of 12 stories and play 100 games.
+2. **Robustness Experiment**: 
+    - Same as homogeneous but includes one persistent free-rider (aka dummy agent, always contributes 0) 
+    - Tests cooperation resilience under persistent free-riding 
 
-    - **Scaling Experiment:**
-We investigate scaling behavior by increasing the number of agents, N ,
-from 4 to 16 and 32. 
-
-    - **Robustness Experiment**: 
-To assess cooperative resilience under adversarial conditions, we designed a robustness experiment with 4 agent groups in which one agent consistently contributed **zero tokens (dummy agent)**, simulating persistent free-riding behavior.
-
-2. **Heterogenous Experiment**: 4 playing agents are each prompted by a random story from a set of 12 stories and play 400 games.
+3. **Heterogenous Experiment**: 
+    - Each agent receives a random story from the corpus 
+    - Reveals cooperation dynamics when agents have different narrative influences 
 
 ### **Illustration**
 
-Repeated multi-round public goods game among homogeneous and heterogeneous LLM agents primed with various narratives.
-<p align="center"> <img src="sample_figures/storyagents_Illustration.jpg" width="600"> </p>
+Repeated public goods game with narrative priming. *Homogeneous*: all agents receive identical story prompts. *Heterogeneous*: each agent receives different narrative priming, creating mixed behavioral contexts within the same game. 
+<p align="center"> <img src="sample_figures_v1.2/StoryAgents_Illustration.png" width="600"> </p>
 
 The study tracks the following metrics:
 - **Contributions** per round
 - **Round Payoffs**
 - **Cumulative Payoffs**
 - **Collaboration Score**
-
+- **Pool Allocation Patterns**
 ---
 ## **Features**
-- Multi-agent framework with LLM-powered decision-making  
-- Customizable storytelling influence on cooperation  
-- Three experiment types to evaluate different scenarios  
-- Automatic logging of results and intermediate saving for resuming experiments  
-- Supports different model configurations (LLMs, rule-based, and dummy agents)   
+- Dual pool topologies: single-pool (traditional) and multi-pool (networked) game configurations 
+- Multi-agent cooperation with LLM-powered decision-making 
+- Customizable storytelling influence on cooperation patterns 
+- Three experiment types for comprehensive evaluation 
+- Checkpoint/Resume: automatic experiment state saving and resumption 
+- Comprehensive visualizations
 
 ---
 
@@ -80,7 +92,7 @@ pip install -U langchain-community
 pip install --upgrade langchain_openai -q
 ```
 ```bash
-pip install numpy pandas matplotlib seaborn jupyterlab nbformat ipykernel
+pip install numpy pandas matplotlib seaborn jupyterlab nbformat ipykernel networkx imageio pillow scipy requests
 ```
 
 ## **Setup API Keys**
@@ -89,72 +101,132 @@ export OPENAI_API_KEY="your-api-key"
 ### **For LLAMA Model**
 export LLAMA_API_URL="your-hosted-url"
 
+export LLAMA_API_KEY="your-api-key" 
+
 ## **Usage**
 ### **Running the Experiments**
-You can run different experiments using the `main.py` script.
+The framework uses `main.py` with –pool_type parameter to control pool topology. 
 
 ---
 
 ### **1. Homogenous Experiment**
-Runs **100 games per story** for agent sizes **[4, 16, 32]**.
-
-#### **(a) Cooperation Among Homogeneous Agents**
-To run across the experiment for all stories:
+**Single-Pool:**
+    
+#### (a) Run specific story (pool_type=single is default, can be omitted)
 ```bash
-for i in {0..11}; do python main.py --exp_type same_story --story_index $i; done
+python main.py --exp_type same_story --story_index 0
 ```
-#### **(b) Robustness Experiment**
-Same as the same story experiment, but introduces one dummy agent who always contributes 0. <br>
 
-To run across the experiment for all stories:
+#### (b) Or explicitly specify single-pool
 ```bash
-for i in {0..11}; do python main.py --exp_type bad_apple --story_index $i; done
+python main.py --exp_type same_story --story_index 0 --pool_type single
 ```
-### **2. Heterogenous Experiment**
-Assigns a random story to each agent and runs 200 games with 4 agents.
+#### (c) Run all 12 stories (portable shell syntax)
+```bash
+for i in $(seq 0 11); do 
+    python main.py --exp_type same_story --story_index $i 
+done
+```
+
+**Multi-Pool:**
+
+#### (a) Run specific story with multi-pool topology (pool_sizes defaults to [2])
+```bash
+python main.py --exp_type same_story --story_index 0 --pool_type multi
+```
+
+#### (b) Explicitly specify pool sizes (optional)
+```bash
+python main.py --exp_type same_story --story_index 0 --pool_type multi --pool_sizes 2
+```
+#### (c) Run all 12 stories with multi-pool topology
+```bash
+for i in $(seq 0 11); do 
+    python main.py --exp_type same_story --story_index $i --pool_type multi
+done
+```
+
+### **2. Robustness Experiment**
+**Single-Pool:**
+    
+#### (a) Test resilience with dummy agent
+```bash
+python main.py --exp_type bad_apple --story_index 0
+```
+
+#### (b) Run all stories for robustness testing
+
+```bash
+for i in $(seq 0 11); do 
+    python main.py --exp_type bad_apple --story_index $i 
+done
+```
+
+**Multi-Pool:**
+
+#### (a) Test resilience in networked setting
+```bash
+python main.py --exp_type bad_apple --story_index 0 --pool_type multi
+```
+
+#### (b) Run all stories with multi-pool robustness testing
+```bash
+for i in $(seq 0 11); do 
+    python main.py --exp_type bad_apple --story_index $i --pool_type multi
+done
+```
+### **3. Heterogenous Experiment**
+**Single-Pool:**
 ```bash
 python main.py --exp_type different_story
 ```
+Or explicitly:
+```bash
+python main.py --exp_type different_story --pool_type single
+```
+**Multi-Pool:**
 
-## **Visualization**
+```bash
+python main.py --exp_type different_story --pool_type multi
+
+```
+
+
+## **Visualization Outputs**
+
 The project includes scripts to visualize collaboration and scaling results.
-### **1. Distribution Analysis Plots**
-Generates violin plots for different experiment types:
+### **1. Single-Pool Visualizations**
 
-- Collaboration Score for Homogenous and Robustness experiments.
-- Payoff per Agent for Heterogenous experiment.
+- **Violin Plots**: distribution of collaboration scores by story
+- **Scaling Analysis**: performance across agent sizes (4→16→32)
+- **Summary Table**: LaTeX-formatted statistics table
+### **2. Multi-Pool Visualizations**
+- **Collaboration Violin Plots**: score distributions by story  
+- **Strategy Scatter Plots**: global vs local pool allocation patterns  
+- **Payoff Analysis**: individual agent performance by story
 
+### Generate all plots
 Run:
 ```bash
-python visualise_collaboration.py
+python visualize_results.py --generate_all
+```
+### Generate specific experiment type
+Run: 
+```bash
+python visualize_results.py --exp_type single_pool
+```
+```bash
+python visualize_results.py --exp_type multi_pool
 ```
 Example Output:
-<p align="center"> <img src="sample_figures/homogenous_collaboration_scores.jpg" width="600"> </p>
 
-### **2. Scaling Experiment Visualization**
-Plots the mean collaboration score across agent sizes to analyze scaling effects in Homogenous Experiment
+Collaboration scores for homogeneous group (\(N=4\)).
+<p align="center"> <img src="sample_figures_v1.2/same_story_4_agents_collaboration_scores_Exp1.png" width="600"> </p>
 
-Run:
-```bash
-python visualise_scaling_experiment.py
-```
-Example Output:
+Scaling experiment results for homogeneous agents across different group sizes \[N={4,16,32}\].
 
-<p align="center"> <img src="sample_figures/homogenous_scaling.jpg" width="600"> </p>
+<p align="center"> <img src="sample_figures_v1.2/Exp1.2_scaling.png" width="600"> </p>
 
-### **3. Bootstrapped Pairwise Differences Visualization**
-Generates bootstrap-resampled distributions of pairwise differences in collaboration scores (and payoffs) between experiment conditions.
+Story-level collaboration scores vs. Global pool allocation fractions
 
-You can upload the  `pairwise_CI_analysis.ipynb` file to [Google Colab](https://colab.research.google.com/?utm_source=scs-index) or click on the _open in colab_ badge at the top.
-
-Example Output: 
-
-<p align="center"> <img src="sample_figures/combined_pairwise_CI_plot_same_story_ag4_ro5_end10_mult1.5.png" width="600"> </p>
-
-### **4. Summary Statistics Table**
-Generates a LaTeX table of mean ± standard deviation for final Collaboration Scores (homogeneous & robustness conditions) and final Cumulative Payoffs (heterogeneous conditions) across all story prompts with adaptive decimal precision.
-
-Run:
-```bash
-python vis_appendix_table.py
-```
+<p align="center"> <img src="sample_figures_v1.2/Exp3.1_same_story_collabscore_vs_global_frac.png" width="600"> </p>
